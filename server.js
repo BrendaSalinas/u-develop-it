@@ -55,13 +55,28 @@ app.get('/api/candidate/:id', (req, res) => {
     });
 });
 
-//Delete a candidate 
-// db.query(`DELETE FROM candidates WHERE id = ? `, 1, (err, result) => {
-//     if (err) {
-//         console.log(err);
-//     }
-//     console.log(result);
-// });
+//Delete a candidate using the express server and MySQL
+app.delete('/api/candidate/:id', (req,res) => {
+    const sql = `DELETE FROM candidates WHERE id = ? `;
+    const params = [req.params.id];
+
+    db.query(sql,params, (err, result) => {
+        if (err) {
+            res.status(400).json({ error: err.message });
+        } else if (!result.affectedRows) { //What is affectedRows
+            res.json({
+                message: 'Candidate not found'
+            });
+        } else {
+            res.json({
+                message: 'deleted',
+                changes: result.affectedRows,
+                id: req.params.id
+            });
+        }
+    });
+});
+
 
 //Adding a candidate back to the table 
 const sql = `INSERT INTO candidates (id, first_name, last_name, industry_connected) VALUES (?,?,?,?)`;
