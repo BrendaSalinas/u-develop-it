@@ -65,6 +65,37 @@ app.get('/api/candidate/:id', (req, res) => {
     });
 });
 
+//This is to display All parties 
+app.get('/api/parties', (req, res) => {
+    const sql = `SELECT * FROM parties`;
+    db.query(sql, (err, rows) => {
+        if (err) {
+            res.status(500).json({ error: err.message });
+            return;
+        }
+        res.json({
+            message: 'success',
+            data: rows
+        });
+    });
+});
+
+// this is to display an individual party.
+app.get('/api/party/:id', (req,res) => {
+    const sql = `SELECT * FROM parties WHERE id = ?`;
+    const params = [req.params.id];
+    db.query(sql, params, (err, row) => {
+        if(err) {
+            res.status(400).json({ error: err.message});
+            return;
+        }
+        res.json({
+            message: 'success',
+            data: row
+        });
+    });
+});
+
 //DELETE a candidate using the express server and MySQL
 app.delete('/api/candidate/:id', (req,res) => {
     const sql = `DELETE FROM candidates WHERE id = ? `;
@@ -110,10 +141,27 @@ app.post('/api/candidate', ({ body }, res) => {
     });
 });
 
-
-//Adding a candidate back to the table 
-
-
+//ths will delete parties
+app.delete('/api/party/:id', (req, res) => {
+    const sql = `DELETE FROM parties WHERE id = ?`;
+    const params =[req.params.id];
+    db.query(sql, params, (err, result) => {
+        if(err) {
+            res.status(400).json({ error:res.message });
+            //checks if anything was deleted 
+        } else if(!result.affectedRows) {
+            res.json({
+                message: 'Party not found'
+            });
+        } else {
+            res.json({
+                message: 'deleted', 
+                changes: result.affectedRows,
+                id: req.params.id
+            });
+        }
+    });
+});
 
 //Handle user requests that aren't supported by the app 
 app.use((req, res) => {
